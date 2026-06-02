@@ -1,5 +1,5 @@
 # Sebaran Universitas Alumni SD Muhammadiyah 1 Angkatan 45
-Ini ditujukan untuk mengetahui sebaran universitas dari alumni angkatan 45
+Ini ditujukan untuk mengetahui sebaran universitas dari alumni angkatan 45, btw ini datanya ga 100% valid palingan sekitar 90an persen aja soalnya ada beberapa yang kuliah terus tercantum di pddikti tapi ga ke detect di code nya, gw males benerin
 (ada beberapa univ yang gamasuk gw malas ubah lagi cek aja sendiri di folder)
 Berikut adalah rincian data sebarannya:
 ### 🏢 Universitas Mulawarman (58 Orang)
