@@ -1,5 +1,6 @@
 # Sebaran Universitas Alumni SD Muhammadiyah 1 Angkatan 45
 Ini ditujukan untuk mengetahui sebaran universitas dari alumni angkatan 45
+(ada beberapa univ yang gamasuk gw malas ubah lagi cek aja sendiri di folder)
 Berikut adalah rincian data sebarannya:
 ### 🏢 Universitas Mulawarman (58 Orang)
 **Administrasi Bisnis** (1 orang):
