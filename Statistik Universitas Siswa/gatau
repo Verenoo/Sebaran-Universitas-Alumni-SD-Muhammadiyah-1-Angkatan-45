@@ -4,7 +4,6 @@ import os
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-# 1. Konfigurasi Awal
 file_input = 'hasil_universitas_lengkap.csv'
 folder_output = 'Gambar_Daftar_Nama'
 
@@ -37,7 +36,6 @@ total_per_kampus = defaultdict(int)
 print("Membaca data dari CSV...")
 
 try:
-    # 2. Proses Ekstraksi Data
     with open(file_input, mode='r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -75,48 +73,38 @@ try:
     for univ, total in universitas_tersortir:
         jurusans = sorted(rekap[univ].keys())
         
-        # Menghitung total baris yang dibutuhkan agar tinggi gambar presisi
-        total_baris = 3 # Ruang untuk Judul
+        total_baris = 3 
         for j in jurusans:
             total_baris += 1 # Baris nama jurusan
             total_baris += len(rekap[univ][j]) # Baris untuk setiap nama siswa
             total_baris += 0.5 # Spasi antar jurusan
             
-        # Mengatur ukuran kanvas gambar (lebar 8 inch, tinggi menyesuaikan jumlah baris)
         tinggi_gambar = max(4, total_baris * 0.25)
         fig, ax = plt.subplots(figsize=(8, tinggi_gambar))
         
-        # Mengatur batas koordinat dan menyembunyikan garis kotak grafik
         ax.set_xlim(0, 10)
         ax.set_ylim(0, total_baris)
         ax.axis('off')
-        
-        # Titik awal penulisan teks dari atas ke bawah
+
         posisi_y = total_baris - 1
         
-        # Menulis Judul Universitas
         ax.text(0.2, posisi_y, f"🏢 Rincian Siswa di {univ.title()} ({total} Orang)", 
                 fontsize=16, fontweight='bold', color='navy')
         posisi_y -= 2
         
-        # Melakukan perulangan untuk mencetak Jurusan dan Nama
         for jurusan in jurusans:
             siswa_list = sorted(rekap[univ][jurusan])
             
-            # Menulis Nama Jurusan
             ax.text(0.2, posisi_y, f"■ {jurusan.title()} ({len(siswa_list)} orang)", 
                     fontsize=12, fontweight='bold', color='darkred')
             posisi_y -= 1
             
-            # Menulis Nama Siswa
             for siswa in siswa_list:
                 ax.text(0.8, posisi_y, f"• {siswa}", fontsize=11, color='black')
                 posisi_y -= 1
                 
-            # Memberikan sedikit jarak sebelum jurusan berikutnya
             posisi_y -= 0.5
             
-        # Menyimpan gambar
         nama_file = f"{folder_output}/Daftar_Nama_{univ.replace(' ', '_')}.png"
         plt.savefig(nama_file, dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
