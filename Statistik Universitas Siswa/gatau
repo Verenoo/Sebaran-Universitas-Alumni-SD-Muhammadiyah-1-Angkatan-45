@@ -1,0 +1,128 @@
+import csv
+import re
+import os
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+# 1. Konfigurasi Awal
+file_input = 'hasil_universitas_lengkap.csv'
+folder_output = 'Gambar_Daftar_Nama'
+
+if not os.path.exists(folder_output):
+    os.makedirs(folder_output)
+
+daftar_kampus = [
+    "UNIVERSITAS INDONESIA", "UNIVERSITAS GADJAH MADA", "INSTITUT TEKNOLOGI BANDUNG", 
+    "INSTITUT TEKNOLOGI SEPULUH NOPEMBER", "UNIVERSITAS AIRLANGGA", "UNIVERSITAS DIPONEGORO", 
+    "UNIVERSITAS BRAWIJAYA", "UNIVERSITAS MULAWARMAN", "UNIVERSITAS MUHAMMADIYAH KALIMANTAN TIMUR", 
+    "UNIVERSITAS TERBUKA", "INSTITUT TEKNOLOGI KALIMANTAN", "UNIVERSITAS NEGERI SEMARANG", 
+    "UNIVERSITAS NEGERI MALANG", "UNIVERSITAS NEGERI SURABAYA", "POLITEKNIK NEGERI SAMARINDA", 
+    "UNIVERSITAS ANDALAS", "UNIVERSITAS ISLAM INDONESIA", "UNIVERSITAS BINA NUSANTARA", 
+    "UNIVERSITAS 17 AGUSTUS 1945 SAMARINDA", "UNIVERSITAS ISLAM NEGERI MAULANA MALIK IBRAHIM", 
+    "UNIVERSITAS ISLAM NEGERI SUNAN AMPEL", "UNIVERSITAS ISLAM NEGERI SUNAN KALIJAGA", 
+    "STMIK WIDYA CIPTA DHARMA", "UNIVERSITAS GUNADARMA", "UNIVERSITAS TULANG BAWANG", 
+    "SEKOLAH TINGGI TEKNOLOGI MIGAS", "UNIVERSITAS PEMBANGUNAN NASIONAL VETERAN YOGYAKARTA", 
+    "UNIVERSITAS ISLAM LAMONGAN", "INSTITUT TEKNOLOGI KESEHATAN DAN SAINS WIYATA HUSADA SAMARINDA", 
+    "UNIVERSITAS TRISAKTI", "STIKES MOHAMMAD HUSNI THAMRIN", "INSTITUT DIGITAL EKONOMI LPKIA", 
+    "UNIVERSITAS KRISNADWIPAYANA", "INSTITUT SENI INDONESIA YOGYAKARTA", "UNIVERSITAS PRESIDEN", 
+    "UNIVERSITAS TELKOM", "UNIVERSITAS DAYANU IKHSANUDDIN", "UNIVERSITAS SUMATERA UTARA", 
+    "UNIVERSITAS PASUNDAN", "POLITEKNIK NEGERI UJUNG PANDANG", "UNIVERSITAS TRIBHUWANA TUNGGA DEWI", 
+    "POLTEKKES KEMENKES SURAKARTA", "UNIVERSITAS MERCU BUANA", "UNIVERSITAS BOROBUDUR", 
+    "UNIVERSITAS PANCASILA", "UNIVERSITAS AMIKOM YOGYAKARTA", "UNIVERSITAS KUNINGAN", "UNIVERSITAS SAMAWA"
+]
+
+rekap = defaultdict(lambda: defaultdict(list))
+total_per_kampus = defaultdict(int)
+
+print("Membaca data dari CSV...")
+
+try:
+    # 2. Proses Ekstraksi Data
+    with open(file_input, mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            status = row['Status Pencarian']
+            detail = row['Detail Universitas & Jurusan'].strip()
+            nama_siswa = row['Nama Siswa'].strip().title()
+            
+            if status == 'Ditemukan' and "Silakan cari kata kunci lain" not in detail:
+                match = re.search(r'\b\d{6,}\b', detail)
+                if match:
+                    nim = match.group()
+                    parts = detail.split(nim)
+                    kampus_jurusan = parts[1].strip() if len(parts) > 1 else "-"
+                    
+                    nama_univ = "KAMPUS LAINNYA"
+                    nama_jurusan = kampus_jurusan
+                    
+                    for kampus in daftar_kampus:
+                        if kampus in kampus_jurusan:
+                            nama_univ = kampus
+                            nama_jurusan = kampus_jurusan.replace(kampus, "").strip()
+                            break
+                    
+                    if not nama_jurusan:
+                        nama_jurusan = "TIDAK DIKETAHUI"
+                        
+                    rekap[nama_univ][nama_jurusan].append(nama_siswa)
+                    total_per_kampus[nama_univ] += 1
+
+    # 3. Proses Pembuatan Gambar Poster Daftar Nama
+    print(f"Membuat gambar daftar nama di folder '{folder_output}'...")
+    
+    universitas_tersortir = sorted(total_per_kampus.items(), key=lambda x: x[1], reverse=True)
+    
+    for univ, total in universitas_tersortir:
+        jurusans = sorted(rekap[univ].keys())
+        
+        # Menghitung total baris yang dibutuhkan agar tinggi gambar presisi
+        total_baris = 3 # Ruang untuk Judul
+        for j in jurusans:
+            total_baris += 1 # Baris nama jurusan
+            total_baris += len(rekap[univ][j]) # Baris untuk setiap nama siswa
+            total_baris += 0.5 # Spasi antar jurusan
+            
+        # Mengatur ukuran kanvas gambar (lebar 8 inch, tinggi menyesuaikan jumlah baris)
+        tinggi_gambar = max(4, total_baris * 0.25)
+        fig, ax = plt.subplots(figsize=(8, tinggi_gambar))
+        
+        # Mengatur batas koordinat dan menyembunyikan garis kotak grafik
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, total_baris)
+        ax.axis('off')
+        
+        # Titik awal penulisan teks dari atas ke bawah
+        posisi_y = total_baris - 1
+        
+        # Menulis Judul Universitas
+        ax.text(0.2, posisi_y, f"🏢 Rincian Siswa di {univ.title()} ({total} Orang)", 
+                fontsize=16, fontweight='bold', color='navy')
+        posisi_y -= 2
+        
+        # Melakukan perulangan untuk mencetak Jurusan dan Nama
+        for jurusan in jurusans:
+            siswa_list = sorted(rekap[univ][jurusan])
+            
+            # Menulis Nama Jurusan
+            ax.text(0.2, posisi_y, f"■ {jurusan.title()} ({len(siswa_list)} orang)", 
+                    fontsize=12, fontweight='bold', color='darkred')
+            posisi_y -= 1
+            
+            # Menulis Nama Siswa
+            for siswa in siswa_list:
+                ax.text(0.8, posisi_y, f"• {siswa}", fontsize=11, color='black')
+                posisi_y -= 1
+                
+            # Memberikan sedikit jarak sebelum jurusan berikutnya
+            posisi_y -= 0.5
+            
+        # Menyimpan gambar
+        nama_file = f"{folder_output}/Daftar_Nama_{univ.replace(' ', '_')}.png"
+        plt.savefig(nama_file, dpi=150, bbox_inches='tight', facecolor='white')
+        plt.close()
+
+    print("="*50)
+    print(f"SELESAI! Gambar daftar nama berhasil dibuat di folder '{folder_output}'")
+
+except Exception as e:
+    print("Terjadi Error:", e)
