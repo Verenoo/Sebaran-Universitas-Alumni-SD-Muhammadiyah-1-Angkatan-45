@@ -7,7 +7,6 @@ import time
 import random
 import csv
 
-# Daftar seluruh siswa Kelas VI (6A - 6F)
 daftar_nama = [
     # Kelas 6 A
     "Abdul Waris Syech", "Abidzar Althaffarel", "Akhtar Rakha Hardiansyahputra", "Altaf Nayottama Marhaendra", 
@@ -81,7 +80,6 @@ daftar_nama = [
     "Suci Masawa Arindi", "Syifa Andini"
 ]
 
-# File CSV diubah namanya agar tidak bercampur
 nama_file_csv = "hasil_universitas_lengkap.csv"
 
 with open(nama_file_csv, mode='w', newline='', encoding='utf-8') as file:
@@ -119,29 +117,21 @@ for idx, nama in enumerate(daftar_nama, start=1):
         print(f"   [INFO] Menunggu {waktu_tunggu:.1f} detik untuk hasil loading...")
         time.sleep(waktu_tunggu)
         
-        # -------------------------------------------------------------
-        # LOGIKA BARU: MEMANJAT KOTAK HASIL UNTUK MENGAMBIL SEMUA TEKS
-        # -------------------------------------------------------------
         try:
-            # Mencari tombol/link yang menuju profil
             hasil = driver.find_elements(By.XPATH, "//a[contains(@href, '/detail-mhs') or contains(@href, 'mahasiswa') or contains(@href, 'mhs')]")
             
             if len(hasil) > 0:
                 elemen_wadah = hasil[0]
                 
-                # Robot memanjat ke "kotak/wadah" yang lebih besar di atas link tersebut
-                for _ in range(5): # Naik maksimal 5 tingkat DOM
+                for _ in range(5):
                     try:
                         elemen_wadah = elemen_wadah.find_element(By.XPATH, "..")
-                        # Jika kotaknya sudah berisi cukup banyak teks (bukan cuma 'Lihat Detail')
                         if len(elemen_wadah.text) > 35: 
                             break
                     except:
                         break
                         
                 teks_kotor = elemen_wadah.text
-                
-                # Membersihkan format teks, mengubah Enter jadi pemisah ( | ), dan membuang tulisan "Lihat Detail"
                 teks_bersih = teks_kotor.replace('\n', ' | ').replace(' | Lihat Detail', '').replace('Lihat Detail', '')
                 
                 status = "Ditemukan"
